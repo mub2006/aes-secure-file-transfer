@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="AES-256-GCM encrypted file transfer prototype">
+  <title>SecureDrop | AES File Transfer</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="/"><span class="brand-icon">S</span><span>SecureDrop<small>AES-256-GCM FILE TRANSFER</small></span></a>
+    <div class="secure-pill"><span></span> End-to-end encryption</div>
+  </header>
+
+  <main class="shell">
+    <section class="hero">
+      <div class="eyebrow">CSA5116 · CRYPTOGRAPHY AND NETWORK SECURITY</div>
+      <h1>Share files.<br><em>Not your data.</em></h1>
+      <p>Encrypt files on your device before they reach the transfer server. Only someone with the transfer details and separate AES key can decrypt them.</p>
+      <div class="hero-points"><span>✓ AES-256-GCM</span><span>✓ Tamper detection</span><span>✓ Key stays on your device</span></div>
+    </section>
+
+    <section class="workspace">
+      <div class="tabs" role="tablist">
+        <button class="tab active" id="send-tab" role="tab" aria-selected="true" aria-controls="send-panel">↑ Send a file</button>
+        <button class="tab" id="receive-tab" role="tab" aria-selected="false" aria-controls="receive-panel">↓ Receive a file</button>
+      </div>
+
+      <section class="panel" id="send-panel" role="tabpanel" aria-labelledby="send-tab">
+        <div class="panel-heading"><div><div class="step-label">SENDER WORKFLOW</div><h2>Encrypt and send</h2></div><span class="step-count">01 / 02</span></div>
+        <label class="dropzone" id="dropzone" for="file-input">
+          <input type="file" id="file-input">
+          <span class="upload-icon">↑</span>
+          <strong>Choose a file to encrypt</strong>
+          <span>or drag and drop it here</span>
+          <small>Maximum file size: {{ max_file_mb }} MB</small>
+          <div class="selected-file" id="selected-file" hidden></div>
+        </label>
+        <button class="primary-btn" id="encrypt-send-btn" disabled>Encrypt file and create transfer <span>→</span></button>
+        <div class="notice">Your file is encrypted in this browser. The server receives only the encrypted payload.</div>
+        <div class="result-card" id="sender-result" hidden>
+          <div class="success-title"><span>✓</span><div><strong>Your encrypted transfer is ready</strong><small>Share the transfer details with the receiver.</small></div></div>
+          <div class="credential"><label>TRANSFER ID</label><div><code id="result-id"></code><button class="copy-btn" data-copy="result-id">Copy</button></div></div>
+          <div class="credential"><label>ACCESS TOKEN</label><div><code id="result-token"></code><button class="copy-btn" data-copy="result-token">Copy</button></div></div>
+          <div class="credential key-credential"><label>AES-256 KEY · SHARE SEPARATELY</label><div><code id="result-key"></code><button class="copy-btn" data-copy="result-key">Copy</button></div></div>
+          <div class="warning">Important: Send the AES key through a different trusted channel. Anyone with both the transfer details and key can decrypt the file. The key is not stored by this application.</div>
+          <button class="secondary-btn" id="download-key-btn">Download key file</button>
+          <p class="expiry" id="expiry-text"></p>
+        </div>
+      </section>
+
+      <section class="panel" id="receive-panel" role="tabpanel" aria-labelledby="receive-tab" hidden>
+        <div class="panel-heading"><div><div class="step-label">RECEIVER WORKFLOW</div><h2>Download and decrypt</h2></div><span class="step-count">02 / 02</span></div>
+        <div class="form-field"><label for="transfer-id">TRANSFER ID</label><input id="transfer-id" type="text" placeholder="e.g. 4F8A2B7C91D0" autocomplete="off"></div>
+        <div class="form-field"><label for="access-token">ACCESS TOKEN</label><input id="access-token" type="password" placeholder="Paste the access token" autocomplete="off"></div>
+        <div class="form-field"><label for="aes-key">AES-256 KEY</label><input id="aes-key" type="password" placeholder="Paste the separately shared key" autocomplete="off"></div>
+        <button class="primary-btn" id="download-decrypt-btn">Download and decrypt <span>→</span></button>
+        <div class="notice">Decryption happens in your browser. If the key is wrong or the encrypted file was changed, authentication fails and no file is released.</div>
+        <div class="result-card" id="receiver-result" hidden></div>
+      </section>
+    </section>
+
+    <section class="how-it-works">
+      <div><div class="step-label">HOW IT WORKS</div><h2>Protected at every step.</h2></div>
+      <div class="flow">
+        <div class="flow-item"><b>01</b><strong>Select</strong><small>Choose your original file</small></div><span>→</span>
+        <div class="flow-item"><b>02</b><strong>Encrypt</strong><small>AES-256-GCM in browser</small></div><span>→</span>
+        <div class="flow-item"><b>03</b><strong>Transfer</strong><small>Server stores ciphertext</small></div><span>→</span>
+        <div class="flow-item"><b>04</b><strong>Verify</strong><small>Authenticate, then decrypt</small></div>
+      </div>
+    </section>
+
+    <section class="activity">
+      <div class="activity-head"><div><div class="step-label">LOCAL SESSION</div><h2>Activity log</h2></div><button class="text-btn" id="clear-log-btn">Clear log</button></div>
+      <div id="activity-log" class="log-empty">Your recent actions will appear here. This log stays in this browser session.</div>
+    </section>
+
+    <footer><span>SecureDrop · Student project prototype</span><span>Encryption keys are never uploaded to the server.</span></footer>
+  </main>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>
